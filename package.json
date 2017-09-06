@@ -1,0 +1,26 @@
+{
+  "name": "route-serve",
+  "version": "0.0.1",
+  "description": "Simple serving of routes to handle requests",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/bradoyler/route-serve.git"
+  },
+  "keywords": [
+    "webhook",
+    "http",
+    "server",
+    "simple"
+  ],
+  "author": "Brad Oyler <bradoyler@gmail.com> (github.com/bradoyler)",
+  "license": "MIT",
+  "scripts": {
+    "start": "node start",
+    "test": "node test"
+  },
+  "devDependencies": {
+    "standard": "^10.0.3",
+    "superagent": "^3.6.0"
+  }
+}
