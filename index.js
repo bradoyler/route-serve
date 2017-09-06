@@ -30,6 +30,12 @@ function requestHandler (req, res) {
       res.on('error', err => {
         console.error('res Error: ', err.status)
       })
+
+      // trigger route handler
+      if (typeof found === 'function') {
+        found(req, res)
+      }
+
       res.writeHead(200, {'Content-Type': 'application/json'})
       const responseBody = { method, url, body }
       res.write(JSON.stringify(responseBody))

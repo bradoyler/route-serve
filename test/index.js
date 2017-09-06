@@ -4,7 +4,9 @@ const server = require('../index')
 const port = process.env.PORT || 3000
 
 const routes = {
-  '/test/foo': true,
+  '/test/foo': function (req, res) {
+    console.log(req.url, 'hit!')
+  },
   '/api/1': true
 }
 

@@ -9,6 +9,21 @@ Simple serving of routes to handle requests
 
 [![NPM](https://nodei.co/npm/route-serve.png?downloads=true&downloadRank=true)](https://nodei.co/npm/route-serve/) [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
+## Start serving routes
+```
+const server = require('route-serve')
+const port = process.env.PORT || 3000
+
+const routes = {
+  '/test/foo': function (req, res) {
+    console.log(req.url, 'hit!')
+  },
+  '/api/1': true
+}
+
+server.listen({ port, routes })
+```
+
 ------
 The MIT License (MIT)
 
