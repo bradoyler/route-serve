@@ -51,7 +51,9 @@ function listen ({ port, routes }, cb) {
   Server = http.createServer(requestHandler)
   Server.listen(port, () => {
     console.log('listening on port:' + port)
-    cb()
+    if (typeof cb === 'function') {
+      cb()
+    }
   })
 }
 
