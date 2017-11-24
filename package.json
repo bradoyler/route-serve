@@ -1,6 +1,6 @@
 {
   "name": "route-serve",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Simple serving of routes to handle requests",
   "main": "index.js",
   "repository": {
@@ -20,7 +20,11 @@
     "test": "node test"
   },
   "devDependencies": {
-    "standard": "^10.0.3",
+    "eslint-config-standard": "10.2.1",
+    "eslint-plugin-import": "2.8.0",
+    "eslint-plugin-node": "5.2.1",
+    "eslint-plugin-promise": "3.6.0",
+    "eslint-plugin-standard": "3.0.1",
     "superagent": "^3.6.0"
   }
 }

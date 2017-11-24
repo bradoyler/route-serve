@@ -1,4 +1,4 @@
-const server = require('./index')
+const routeServe = require('./index')
 const port = process.env.PORT || 3000
 
 const routes = {
@@ -6,6 +6,6 @@ const routes = {
   '/api/1': true
 }
 
-server.listen({ port, routes }, () => {
+routeServe.createServer({ port, routes }, () => {
   console.log('serving:', routes)
 })

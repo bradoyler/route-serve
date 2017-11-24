@@ -1,9 +1,6 @@
 const http = require('http')
 const urlParse = require('url').parse
 
-let Server = null
-let Routes = null
-
 function handle404 (req, res) {
   res.writeHead(404, {'Content-Type': 'application/json'})
   const { method, url } = req
@@ -11,18 +8,32 @@ function handle404 (req, res) {
   res.end(JSON.stringify(responseBody))
 }
 
-function requestHandler (req, res) {
-  const { method, url } = req
-  const URL = urlParse(url)
-  const found = Routes[URL.pathname]
-  const validMethod = (method === 'POST' || method === 'GET')
-  // console.log(found, URL.pathname, '>>>')
+function Server ({ port, routes }, cb) {
+  this.routes = routes
+  this.port = port
+  this.server = http.createServer(this.requestHandler())
+  .listen(port, () => {
+    console.log('listening on port:' + port)
+    if (typeof cb === 'function') {
+      cb()
+    }
+  })
+}
 
-  if (validMethod && found) {
-    let body = []
-    req.on('error', err => {
-      console.error('req Error:', err.status)
-    })
+Server.prototype.requestHandler = function () {
+  const routes = this.routes
+
+  return function (req, res) {
+    const { method, url } = req
+    const URL = urlParse(url)
+    const found = routes[URL.pathname]
+    const validMethod = (method === 'POST' || method === 'GET')
+
+    if (validMethod && found) {
+      let body = []
+      req.on('error', err => {
+        console.error('req Error:', err.status)
+      })
     .on('data', (chunk) => {
       body.push(chunk)
     }).on('end', () => {
@@ -41,25 +52,20 @@ function requestHandler (req, res) {
       res.write(JSON.stringify(responseBody))
       res.end()
     })
-  } else {
-    handle404(req, res)
+    } else {
+      handle404(req, res)
+    }
   }
 }
 
-function listen ({ port, routes }, cb) {
-  Routes = routes
-  Server = http.createServer(requestHandler)
-  Server.listen(port, () => {
-    console.log('listening on port:' + port)
-    if (typeof cb === 'function') {
-      cb()
-    }
-  })
+Server.prototype.close = function () {
+  console.log('closing server on port:', this.port)
+  return this.server.close()
 }
 
-function close () {
-  Server.close()
+function createServer ({ port, routes }, cb) {
+  return new Server({ port, routes }, cb)
 }
 
-module.exports.listen = listen
-module.exports.close = close
+module.exports.createServer = createServer
+module.exports.listen = createServer

@@ -1,7 +1,6 @@
 # Route-Serve  
-Simple serving of routes to handle requests
-
-## Work-in-progress
+Simple serving of routes to handle HTTP requests (zero-dependency)
+> built to respond to bots and IoT
 
 [![Build Status](https://travis-ci.org/bradoyler/route-serve.svg?branch=master)](https://travis-ci.org/bradoyler/route-serve)
 [![NPM Version][npm-image]][npm-url]
@@ -11,7 +10,7 @@ Simple serving of routes to handle requests
 
 ## Start serving routes
 ```js
-const server = require('route-serve')
+const rs = require('route-serve')
 const port = process.env.PORT || 3000
 
 const routes = {
@@ -21,8 +20,12 @@ const routes = {
   '/api/1': true
 }
 
-server.listen({ port, routes })
+rs.createServer({ port, routes })
 ```
+
+TODOs:
+- route params
+- other Content-Types
 
 ------
 The MIT License (MIT)
