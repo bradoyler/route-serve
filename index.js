@@ -1,4 +1,5 @@
 const http = require('http')
+const qs = require('querystring')
 const urlParse = require('url').parse
 
 function handle404 (req, res) {
@@ -49,27 +50,28 @@ Server.prototype.requestHandler = function () {
 
     const { method, url } = req
     const URL = urlParse(url)
-    const route = routes.find(r => r.path === URL.pathname)
+    const route = routes.find(r => r.path === URL.pathname && r.method === method)
 
     // validate route path
     if (!route) {
       return handle404(req, res)
     }
 
-    // validate HTTP Method
-    if (route.method !== method) {
-      return handle404(req, res)
-    }
-
     let chunks = []
-    req.on('data', chunk => chunks.push(chunk))
+    req.on('data', chunk => {
+      chunks.push(chunk)
+      if (chunks.length > 1e6) { // kill large uploads
+        res.writeHead(413, {'Content-Type': 'text/plain'}).end()
+        req.connection.destroy()
+      }
+    })
+
     req.on('end', () => {
       if (typeof route.handler === 'function') {
         res.sendJson = sendJson
         res.sendHtml = sendHtml
-        const data = Buffer.concat(chunks).toString()
         try {
-          req.postData = data
+          req.formData = qs.parse(Buffer.concat(chunks).toString('utf8'))
           route.handler(req, res)
           return
         } catch (ex) {
@@ -83,6 +85,7 @@ Server.prototype.requestHandler = function () {
 Server.prototype.close = function (exitProcess) {
   console.log('closing server on port:', this.port)
   if (exitProcess) {
+    console.log('exiting process:', process.pid)
     return process.exit()
   }
   return this.server.close()

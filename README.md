@@ -1,5 +1,5 @@
-# Route-Serve  
-Simple serving of routes to handle HTTP requests (zero-dependency)
+# Route-Serve
+experimental HTTP server with routes as objects (zero-dependency)
 > built to respond to bots and IoT
 
 [![Build Status](https://travis-ci.org/bradoyler/route-serve.svg?branch=master)](https://travis-ci.org/bradoyler/route-serve)
@@ -11,7 +11,6 @@ Simple serving of routes to handle HTTP requests (zero-dependency)
 ## Start serving routes
 ```js
 const rs = require('route-serve')
-const port = process.env.PORT || 3000
 
 const routes = [
   {
@@ -22,21 +21,22 @@ const routes = [
     }
   },
   {
-    method: 'GET',
+    method: 'POST',
     path: '/test/json',
     handler: (req, res) => {
-      res.sendJson({test: 'foo'})
+      res.sendJson({test: 'foo', data: req.postData})
     }
   }
 ]
 
-rs.createServer({ port, routes })
+rs.createServer({ port: 3000, routes })
 ```
 
 TODOs:
-- route params
+- route params, validations
 - middleware
 - serve static files
+- multi-part form data tests
 
 ------
 The MIT License (MIT)
