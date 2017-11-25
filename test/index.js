@@ -1,94 +1,98 @@
 const request = require('superagent')
 const assert = require('assert')
 const routeServe = require('../index')
-const portA = process.env.PORT || 3000
-const portB = process.env.PORT || 3001
 
-const routes = {
-  '/test/foo': function (req, res) {
-    console.log(req.url, 'hit!')
+const routes = [
+  {
+    method: 'GET',
+    path: '/test/html',
+    handler: function (req, res) {
+      console.log('GET:', req.url)
+      res.sendHtml('<h1>TEST</h1>')
+    }
   },
-  '/api/1': true
-}
+  {
+    method: 'GET',
+    path: '/test/json',
+    handler: (req, res) => {
+      console.log('GET:', req.url)
+      res.sendJson({test: 'foo'})
+    }
+  },
+  {
+    method: 'POST',
+    path: '/test/foo',
+    handler: function (req, res) {
+      console.log('POST:', req.url, req.postData)
+      res.sendJson(req.postData)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/test/error',
+    handler: function (req, res) {
+      console.log('GET:', req.url)
+      throw Error('caught 500')
+    }
+  }
+]
 
-const serverA = routeServe.createServer({ port: portA, routes }, runTestA)
-const serverB = routeServe.createServer({ port: portB, routes }, runTestB)
+const serverA = routeServe.createServer({ port: 3000, routes }, runTests(3000))
+const serverB = routeServe.createServer({ port: 3001, routes }, runTests(3001))
 
-// curl -d '[{foo:\"bar\"}]'  http://localhost:3000/test?foo=bar2
-function runTestA () {
-  request
-    .post(`http://localhost:${portA}/test/foo?test=A`)
-    .send({ name: 'Brad', title: 'dev' }) // sends a JSON post body
-    .set('X-API-Key', 'foobar')
-    .set('Accept', 'application/json')
-    .end((err, res) => {
-      if (err) {
-        console.error('err >>', err.message)
-        serverA.close()
-        return
-      }
-      assert.equal('/test/foo?test=A', res.body.url)
-      console.log('res.body.url >>', res.body.url)
-    })
+setTimeout(() => serverA.close(), 2000)
+setTimeout(() => serverB.close(true), 3000)
 
-  request
-    .get(`http://localhost:${portA}/api/1`)
-    .end((err, res) => {
-      if (err) {
-        console.error('err >>', err.message, res.body.url)
-        serverA.close()
-        return
-      }
-      assert.equal('/api/1', res.body.url)
-      console.log('res.body.url >>', res.body.url)
-    })
+function runTests (port) {
+  return function () {
+    request
+      .post(`http://localhost:${port}/test/foo?test=A`)
+      .send({ name: 'Brad', title: 'dev' }) // sends a JSON post body
+      .set('X-API-Key', 'foobar')
+      .set('Accept', 'application/json')
+      .end((err, res) => {
+        if (err) {
+          console.error('err >>', err.message)
+        }
+        console.log('POST - res.body:', res.body)
+        assert.equal('{"name":"Brad","title":"dev"}', res.body)
+      })
 
-  request
-    .get(`http://localhost:${portA}/404`)
-    .end((err, res) => {
-      if (err) {
-        console.error('err >>', err.message, err.status)
-        serverA.close()
-      }
-      assert.equal(404, res.status)
-    })
-}
+    request
+      .get(`http://localhost:${port}/test/html`)
+      .end((err, res) => {
+        if (err) {
+          console.error('err >>', err.message, res.body.url)
+        }
+        console.log('res.text >>', res.text, res.body)
+        assert.equal('<h1>TEST</h1>', res.text)
+      })
 
-function runTestB () {
-  request
-    .post(`http://localhost:${portB}/test/foo?test=B`)
-    .send({ name: 'Brad', title: 'dev' }) // sends a JSON post body
-    .set('X-API-Key', 'foobar')
-    .set('Accept', 'application/json')
-    .end((err, res) => {
-      if (err) {
-        console.error('err >>', err.message)
-        serverB.close()
-        return
-      }
-      assert.equal('/test/foo?test=B', res.body.url)
-      console.log('res.body.url >>', res.body.url)
-    })
+    request
+      .get(`http://localhost:${port}/test/json`)
+      .end((err, res) => {
+        if (err) {
+          console.error('err >>', err.message, res.body.url)
+        }
+        console.log('res.body >>', res.body)
+        assert.equal('{"test":"foo"}', JSON.stringify(res.body))
+      })
+    request
+      .get(`http://localhost:${port}/404`)
+      .end((err, res) => {
+        if (err) {
+          console.error('err >>', err.message, err.status)
+        }
+        assert.equal(404, res.status)
+      })
 
-  request
-    .get(`http://localhost:${portB}/api/1`)
-    .end((err, res) => {
-      if (err) {
-        console.error('err >>', err.message, res.body.url)
-        serverB.close()
-        return
-      }
-      assert.equal('/api/1', res.body.url)
-      console.log('res.body.url >>', res.body.url)
-    })
-
-  request
-    .get(`http://localhost:${portB}/404`)
-    .end((err, res) => {
-      if (err) {
-        console.error('err >>', err.message, err.status)
-        serverB.close()
-      }
-      assert.equal(404, res.status)
-    })
+    request
+      .get(`http://localhost:${port}/test/error`)
+      .end((err, res) => {
+        if (err) {
+          console.error('err >>', err.message, err.status)
+        }
+        assert.equal(500, res.status)
+      })
+  }
 }

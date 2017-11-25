@@ -13,19 +13,30 @@ Simple serving of routes to handle HTTP requests (zero-dependency)
 const rs = require('route-serve')
 const port = process.env.PORT || 3000
 
-const routes = {
-  '/test/foo': function (req, res) {
-    console.log(req.url, 'hit!')
+const routes = [
+  {
+    method: 'GET',
+    path: '/test/html',
+    handler: function (req, res) {
+      res.sendHtml('<h1>TEST</h1>')
+    }
   },
-  '/api/1': true
-}
+  {
+    method: 'GET',
+    path: '/test/json',
+    handler: (req, res) => {
+      res.sendJson({test: 'foo'})
+    }
+  }
+]
 
 rs.createServer({ port, routes })
 ```
 
 TODOs:
 - route params
-- other Content-Types
+- middleware
+- serve static files
 
 ------
 The MIT License (MIT)

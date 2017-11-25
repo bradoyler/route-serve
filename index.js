@@ -8,6 +8,25 @@ function handle404 (req, res) {
   res.end(JSON.stringify(responseBody))
 }
 
+function handleError (err, req, res) {
+  console.error('handleError()', err)
+  res.writeHead(500, {'Content-Type': 'application/json'})
+  const { method, url } = req
+  res.end(JSON.stringify({ method, url, message: '500 - Error occured' }))
+}
+
+function sendJson (json) {
+  this.writeHead(200, {'Content-Type': 'application/json'})
+  this.write(JSON.stringify(json))
+  this.end()
+}
+
+function sendHtml (html) {
+  this.writeHead(200, {'Content-Type': 'text/html'})
+  this.write(html)
+  this.end()
+}
+
 function Server ({ port, routes }, cb) {
   this.routes = routes
   this.port = port
@@ -24,42 +43,48 @@ Server.prototype.requestHandler = function () {
   const routes = this.routes
 
   return function (req, res) {
+    // error events
+    res.on('error', err => handleError(err, req, res))
+    req.on('error', err => handleError(err, req, res))
+
     const { method, url } = req
     const URL = urlParse(url)
-    const found = routes[URL.pathname]
-    const validMethod = (method === 'POST' || method === 'GET')
+    const route = routes.find(r => r.path === URL.pathname)
 
-    if (validMethod && found) {
-      let body = []
-      req.on('error', err => {
-        console.error('req Error:', err.status)
-      })
-    .on('data', (chunk) => {
-      body.push(chunk)
-    }).on('end', () => {
-      body = Buffer.concat(body).toString()
-      res.on('error', err => {
-        console.error('res Error: ', err.status)
-      })
-
-      // trigger route handler
-      if (typeof found === 'function') {
-        found(req, res)
-      }
-
-      res.writeHead(200, {'Content-Type': 'application/json'})
-      const responseBody = { method, url, body }
-      res.write(JSON.stringify(responseBody))
-      res.end()
-    })
-    } else {
-      handle404(req, res)
+    // validate route path
+    if (!route) {
+      return handle404(req, res)
     }
+
+    // validate HTTP Method
+    if (route.method !== method) {
+      return handle404(req, res)
+    }
+
+    let chunks = []
+    req.on('data', chunk => chunks.push(chunk))
+    req.on('end', () => {
+      if (typeof route.handler === 'function') {
+        res.sendJson = sendJson
+        res.sendHtml = sendHtml
+        const data = Buffer.concat(chunks).toString()
+        try {
+          req.postData = data
+          route.handler(req, res)
+          return
+        } catch (ex) {
+          handleError(ex, req, res)
+        }
+      }
+    })
   }
 }
 
-Server.prototype.close = function () {
+Server.prototype.close = function (exitProcess) {
   console.log('closing server on port:', this.port)
+  if (exitProcess) {
+    return process.exit()
+  }
   return this.server.close()
 }
 
