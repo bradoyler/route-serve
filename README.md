@@ -15,7 +15,7 @@ const rs = require('route-serve')
 const routes =
   {
     'GET /test/html': (req, res) => res.sendHtml('<h1>TEST</h1>'),
-    'POST /test/json': (req, res) => res.sendJson({test: 'foo', data: req.postData})
+    'POST /test/json': (req, res) => res.sendJson({test: 'foo', data: req.formData})
   }
 
 rs(routes).listen(3000, () => console.log('started'))
