@@ -15,11 +15,17 @@ const routes = {
   'GET /test/error': (req, res) => { throw Error(`caught 500: ${req.url}`) }
 }
 
-const serverA = routeServe.createServer({ port: 3000, routes }, runTests(3000))
-const serverB = routeServe.createServer({ port: 3001, routes }, runTests(3001))
+const serverA = routeServe(routes)
+.listen(3000, runTests(3000))
+
+const serverB = routeServe(routes)
+.listen(3001, runTests(3001))
+
+const serverC = routeServe(routes).listen(3002, (res) => console.log('started on 3002!', res))
 
 setTimeout(() => serverA.close(), 2000)
-setTimeout(() => serverB.close(true), 3000)
+setTimeout(() => serverB.close(), 2000)
+setTimeout(() => serverC.close(), 3000)
 
 function runTests (port) {
   return function () {

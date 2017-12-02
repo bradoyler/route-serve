@@ -1,6 +1,6 @@
 # Route-Serve
-experimental HTTP server with routes as a single object (zero-dependency)
-> built to respond to bots and IoT
+Nano-thin, zero-dependency wrapper around [http.Server](https://nodejs.org/dist/latest-v8.x/docs/api/http.html#http_class_http_server) with routes as a single object
+> built for the nano-bots :octocat:
 
 [![Build Status](https://travis-ci.org/bradoyler/route-serve.svg?branch=master)](https://travis-ci.org/bradoyler/route-serve)
 [![NPM Version][npm-image]][npm-url]
@@ -18,7 +18,7 @@ const routes =
     'POST /test/json': (req, res) => res.sendJson({test: 'foo', data: req.postData})
   }
 
-rs.createServer({ port: 3000, routes })
+rs(routes).listen(3000, () => console.log('started'))
 ```
 
 TODOs:

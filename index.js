@@ -28,21 +28,11 @@ function sendHtml (html) {
   this.end()
 }
 
-function Server ({ port, routes }, cb) {
-  this.routes = routes
-  this.port = port
-  this.server = http.createServer(this.requestHandler())
-  .listen(port, () => {
-    console.log('listening on port:' + port)
-    if (typeof cb === 'function') {
-      cb()
-    }
-  })
+function Server (routes) {
+  return http.createServer(requestHandler(routes))
 }
 
-Server.prototype.requestHandler = function () {
-  const routes = this.routes
-
+const requestHandler = (routes) => {
   return function (req, res) {
     // error events
     res.on('error', err => handleError(err, req, res))
@@ -82,18 +72,4 @@ Server.prototype.requestHandler = function () {
   }
 }
 
-Server.prototype.close = function (exitProcess) {
-  console.log('closing server on port:', this.port)
-  if (exitProcess) {
-    console.log('exiting process:', process.pid)
-    return process.exit()
-  }
-  return this.server.close()
-}
-
-function createServer ({ port, routes }, cb) {
-  return new Server({ port, routes }, cb)
-}
-
-module.exports.createServer = createServer
-module.exports.listen = createServer
+module.exports = Server
