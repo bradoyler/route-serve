@@ -50,7 +50,7 @@ Server.prototype.requestHandler = function () {
 
     const { method, url } = req
     const URL = urlParse(url)
-    const route = routes.find(r => r.path === URL.pathname && r.method === method)
+    const route = routes[`${method} ${URL.pathname}`]
 
     // validate route path
     if (!route) {
@@ -67,12 +67,12 @@ Server.prototype.requestHandler = function () {
     })
 
     req.on('end', () => {
-      if (typeof route.handler === 'function') {
+      if (typeof route === 'function') {
         res.sendJson = sendJson
         res.sendHtml = sendHtml
         try {
           req.formData = qs.parse(Buffer.concat(chunks).toString('utf8'))
-          route.handler(req, res)
+          route(req, res)
           return
         } catch (ex) {
           handleError(ex, req, res)

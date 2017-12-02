@@ -2,43 +2,18 @@ const request = require('superagent')
 const assert = require('assert')
 const routeServe = require('../index')
 
-function htmlController (req, res) {
-  console.log(`${req.method}:`, req.url)
-  res.sendHtml('<h1>TEST</h1>')
-}
-
 function jsonController (req, res) {
   const { method, url, formData } = req
   console.log(`${method}:`, url)
   res.sendJson({test: 'foo', formData})
 }
 
-function errorController (req, res) {
-  throw Error(`caught 500: ${req.url}`)
+const routes = {
+  'GET /test/html': (req, res) => res.sendHtml('<h1>TEST</h1>'),
+  'GET /test/json': jsonController,
+  'POST /test/json': jsonController,
+  'GET /test/error': (req, res) => { throw Error(`caught 500: ${req.url}`) }
 }
-
-const routes = [
-  {
-    method: 'GET',
-    path: '/test/html',
-    handler: htmlController
-  },
-  {
-    method: 'GET',
-    path: '/test/json',
-    handler: jsonController
-  },
-  {
-    method: 'POST',
-    path: '/test/json',
-    handler: jsonController
-  },
-  {
-    method: 'GET',
-    path: '/test/error',
-    handler: errorController
-  }
-]
 
 const serverA = routeServe.createServer({ port: 3000, routes }, runTests(3000))
 const serverB = routeServe.createServer({ port: 3001, routes }, runTests(3001))

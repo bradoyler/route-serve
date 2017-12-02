@@ -1,5 +1,5 @@
 # Route-Serve
-experimental HTTP server with routes as objects (zero-dependency)
+experimental HTTP server with routes as a single object (zero-dependency)
 > built to respond to bots and IoT
 
 [![Build Status](https://travis-ci.org/bradoyler/route-serve.svg?branch=master)](https://travis-ci.org/bradoyler/route-serve)
@@ -12,22 +12,11 @@ experimental HTTP server with routes as objects (zero-dependency)
 ```js
 const rs = require('route-serve')
 
-const routes = [
+const routes =
   {
-    method: 'GET',
-    path: '/test/html',
-    handler: function (req, res) {
-      res.sendHtml('<h1>TEST</h1>')
-    }
-  },
-  {
-    method: 'POST',
-    path: '/test/json',
-    handler: (req, res) => {
-      res.sendJson({test: 'foo', data: req.postData})
-    }
+    'GET /test/html': (req, res) => res.sendHtml('<h1>TEST</h1>'),
+    'POST /test/json': (req, res) => res.sendJson({test: 'foo', data: req.postData})
   }
-]
 
 rs.createServer({ port: 3000, routes })
 ```
