@@ -1,6 +1,6 @@
 {
   "name": "route-serve",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Simple serving of routes to handle requests",
   "main": "index.js",
   "repository": {
@@ -20,12 +20,12 @@
     "test": "node test"
   },
   "devDependencies": {
-    "eslint": "3.19.0",
-    "eslint-config-standard": "10.2.1",
-    "eslint-plugin-import": "2.8.0",
-    "eslint-plugin-node": "5.2.1",
-    "eslint-plugin-promise": "3.6.0",
-    "eslint-plugin-standard": "3.0.1",
-    "superagent": "^3.6.0"
+    "eslint": "^3.19.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "superagent": "^3.8.3"
   }
 }
